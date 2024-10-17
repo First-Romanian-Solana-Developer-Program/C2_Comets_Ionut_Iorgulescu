@@ -7,7 +7,9 @@ const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
 
 const user = getKeypairFromEnvironment("SECRET_KEY");
 
-const tokenMint = await createMint(connection, user, user.publicKey, null, 2);
+const DECIMALS = 6;
+
+const tokenMint = await createMint(connection, user, user.publicKey, null, DECIMALS);
 
 const link = getExplorerLink("address", tokenMint.toString(), "devnet");
 
