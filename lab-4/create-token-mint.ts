@@ -9,6 +9,7 @@ const user = getKeypairFromEnvironment("SECRET_KEY");
 
 const DECIMALS = 6;
 
+// @ts-ignore
 const tokenMint = await createMint(connection, user, user.publicKey, null, DECIMALS);
 
 const link = getExplorerLink("address", tokenMint.toString(), "devnet");

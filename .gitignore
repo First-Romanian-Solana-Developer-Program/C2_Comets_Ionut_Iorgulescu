@@ -2,4 +2,7 @@
 /lab-2/node_modules
 /lab-3/node_modules
 /lab-4/node_modules
+/lab-5/node_modules
+/lab-5/.env
+/lab-5/secret.json
 .idea

@@ -11,6 +11,7 @@ const tokenMint = new PublicKey("8dtWDJKTnmohRHkWMVYsvDVC1zrdGmR6Vr6UpyUAkD96");
 
 const recipient = new PublicKey("2JELcDKm9Hk1fWqBp45gtJYXUFoMV3HsKZN5jneHe7Sn");
 
+// @ts-ignore
 const tokenAccount = await getOrCreateAssociatedTokenAccount(connection, user, tokenMint, recipient);
 
 console.log(`Token account: ${tokenAccount.address.toBase58()}`);
