@@ -6,3 +6,4 @@
 /lab-5/.env
 /lab-5/secret.json
 .idea
+.DS_Store
