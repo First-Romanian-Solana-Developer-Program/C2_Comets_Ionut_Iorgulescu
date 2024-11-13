@@ -44,7 +44,7 @@ describe("escrow", async () => {
     tokenProgram: TOKEN_PROGRAM,
   };
 
-  const [alice, bob, tokenMintA, tokenMintB] = makeKeypairs(4);
+  const [user1, user2, tokenMintA, tokenMintB] = makeKeypairs(4);
 
   before(
     "Creates User1 and User2 accounts, 2 token mints, and associated token accounts for both tokens for both users",
@@ -54,7 +54,7 @@ describe("escrow", async () => {
         user1TokenAccountB,
         user2TokenAccountA,
         user2TokenAccountB,
-      ] = [alice, bob].flatMap((keypair) =>
+      ] = [user1, user2].flatMap((keypair) =>
         [tokenMintA, tokenMintB].map((mint) =>
           getAssociatedTokenAddressSync(
             mint.publicKey,
@@ -70,8 +70,8 @@ describe("escrow", async () => {
       );
 
       const sendSolInstructions: Array<TransactionInstruction> = [
-        alice,
-        bob,
+        user1,
+        user2,
       ].map((account) =>
         SystemProgram.transfer({
           fromPubkey: provider.publicKey,
@@ -96,12 +96,12 @@ describe("escrow", async () => {
       const mintTokensInstructions: Array<TransactionInstruction> = [
         {
           mint: tokenMintA.publicKey,
-          authority: alice.publicKey,
+          authority: user1.publicKey,
           ata: user1TokenAccountA,
         },
         {
           mint: tokenMintB.publicKey,
-          authority: bob.publicKey,
+          authority: user2.publicKey,
           ata: user2TokenAccountB,
         },
       ].flatMap((mintDetails) => [
@@ -136,10 +136,10 @@ describe("escrow", async () => {
         ...mintTokensInstructions,
       ];
 
-      await provider.sendAndConfirm(tx, [tokenMintA, tokenMintB, alice, bob]);
+      await provider.sendAndConfirm(tx, [tokenMintA, tokenMintB, user1, user2]);
 
-      accounts.maker = alice.publicKey;
-      accounts.taker = bob.publicKey;
+      accounts.maker = user1.publicKey;
+      accounts.taker = user2.publicKey;
       accounts.tokenMintA = tokenMintA.publicKey;
       accounts.makerTokenAccountA = user1TokenAccountA;
       accounts.takerTokenAccountA = user2TokenAccountA;
@@ -151,7 +151,6 @@ describe("escrow", async () => {
 
   const tokenAOfferedAmount = new BN(1_000_000);
   const tokenBWantedAmount = new BN(1_000_000);
-
 
   const make = async () => {
     // Pick a random ID for the offer we'll make
@@ -180,7 +179,7 @@ describe("escrow", async () => {
     const transactionSignature = await program.methods
       .makeOffer(offerId, tokenAOfferedAmount, tokenBWantedAmount)
       .accounts({ ...accounts })
-      .signers([alice])
+      .signers([user1])
       .rpc();
 
     console.log("transactionSignature", transactionSignature);
@@ -193,22 +192,20 @@ describe("escrow", async () => {
 
     const offerAccount = await program.account.offer.fetch(offer);
 
-    assert(offerAccount.maker.equals(alice.publicKey));
+    assert(offerAccount.maker.equals(user1.publicKey));
     assert(offerAccount.tokenMintA.equals(accounts.tokenMintA));
     assert(offerAccount.tokenMintB.equals(accounts.tokenMintB));
     assert(offerAccount.tokenBWantedAmount.eq(tokenBWantedAmount));
   };
 
-
   const take = async () => {
     const transactionSignature = await program.methods
       .takeOffer()
       .accounts({ ...accounts })
-      .signers([bob])
+      .signers([user2])
       .rpc();
 
     await confirmTransaction(connection, transactionSignature);
-
 
     const user2TokenAccountBalanceAfterResponse =
       await connection.getTokenAccountBalance(accounts.takerTokenAccountA);
